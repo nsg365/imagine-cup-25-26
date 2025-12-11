@@ -1,5 +1,5 @@
 from ..models.schemas import NotificationCommand, MedicalRecommendation, RoutingDecision, PatientProfile
-from ..services.notifications import send_notification
+from ..services.notification import send_notification
 
 class NotificationAgent:
     def build_and_send(self, rec: MedicalRecommendation, routing: RoutingDecision | None, patient: PatientProfile) -> NotificationCommand:

@@ -29,7 +29,6 @@ def get_patient(patient_id: str):
 @app.post("/vitals")
 def submit_vitals(vitals: VitalsInput, background_tasks: BackgroundTasks):
     storage.save_vitals(vitals)
-    # handle via orchestrator in background (non-blocking)
     background_tasks.add_task(orchestrator.handle_new_vitals, vitals)
     return {"status": "received"}
 
@@ -37,6 +36,3 @@ def submit_vitals(vitals: VitalsInput, background_tasks: BackgroundTasks):
 @app.get("/incidents", response_model=List[Incident])
 def get_incidents():
     return storage.list_incidents()
-
-
-# For dev: run "uvicorn backend.main:app --reload" from project root

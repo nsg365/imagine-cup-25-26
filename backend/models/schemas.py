@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import datetime
 from .incident_state import IncidentStatus
 
@@ -23,17 +23,17 @@ class PatientProfile(BaseModel):
     has_diabetes: bool = False
     baseline_hr_min: int = 60
     baseline_hr_max: int = 100
-    emergency_contacts: List[str] = []  # phone numbers / emails
+    emergency_contacts: List[str] = Field(default_factory=list)
     location_lat: Optional[float] = None
     location_lon: Optional[float] = None
 
 
 class VitalAnalysisResult(BaseModel):
     patient_id: str
-    status: str  # NORMAL / WARNING / EMERGENCY
+    status: str
     detected_pattern: Optional[str] = None
     confidence: float = 0.0
-    supporting_evidence: dict = {}
+    supporting_evidence: Dict = Field(default_factory=dict)
 
 
 class MedicalRecommendation(BaseModel):
@@ -51,12 +51,12 @@ class RoutingDecision(BaseModel):
     chosen_hospital_name: str
     eta_minutes: int
     justification: str
-    route_info: dict
+    route_info: Dict = Field(default_factory=dict)
 
 
 class NotificationCommand(BaseModel):
     incident_id: str
-    notify: List[dict]
+    notify: List[Dict]
 
 
 class Incident(BaseModel):
