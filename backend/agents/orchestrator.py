@@ -1,97 +1,101 @@
-import uuid
-from datetime import datetime
-from typing import Optional
-
-from ..models.schemas import (
-    VitalsInput, VitalAnalysisResult, MedicalRecommendation,
-    RoutingDecision, Incident
-)
-from ..models.incident_state import IncidentStatus
+from ..models.schemas import VitalsInput, PatientProfile
 from ..services import storage
-from .vital_monitor import VitalMonitoringAgent
 from .medical_agent import MedicalRecommendationAgent
-from .routing_agent import RoutingAgent
 from .notification_agent import NotificationAgent
-
+from .routing_agent import RoutingAgent  # you have this file already, we’ll adjust later
 
 class OrchestratorAgent:
+    """
+    Main multi-agent coordinator:
+    - Accepts new vitals
+    - Runs medical analysis
+    - Creates / updates incidents
+    - Routes patient if needed
+    - Notifies patient + caregivers + hospitals
+    """
+
     def __init__(self):
-        self.vital_agent = VitalMonitoringAgent()
-        self.medical_agent = MedicalRecommendationAgent()
+        self.med_agent = MedicalRecommendationAgent()
+        self.notify_agent = NotificationAgent()
         self.routing_agent = RoutingAgent()
-        self.notification_agent = NotificationAgent()
 
-    def handle_new_vitals(self, vitals: VitalsInput):
-        # 1. Store vitals
-        storage.save_vitals(vitals)
+    async def handle_new_vitals(self, vitals: VitalsInput):
+        """
+        Called in background when new vitals are sent.
+        """
 
-        # 2. Fetch patient profile
+        print("\n[ORCHESTRATOR] Received vitals:", vitals.model_dump())
+
+        # -------------------------------
+        # 1️⃣ Medical Analysis
+        # -------------------------------
+        rec = self.med_agent.analyze_vitals(vitals)
+
+        if not rec:
+            print("[ORCHESTRATOR] No medical alert triggered.")
+            return
+
+        print("[ORCHESTRATOR] Medical alert triggered!")
+        print(" - Likely condition:", rec.likely_condition)
+        print(" - Triage level:", rec.triage_level)
+        print(" - Confidence:", rec.confidence)
+        print(" - Explanation:")
+        for x in rec.explanation:
+            print("    •", x)
+
+        # -------------------------------
+        # 2️⃣ Load patient profile
+        # -------------------------------
         patient = storage.get_patient(vitals.patient_id)
         if not patient:
-            print(f"[WARN] No patient profile for {vitals.patient_id}, skipping.")
+            print("[ORCHESTRATOR] ERROR: Patient record not found.")
             return
 
-        # 3. Analyze vitals
-        analysis: VitalAnalysisResult = self.vital_agent.analyze(vitals, patient)
-
-        if analysis.status == "NORMAL":
-            print(f"[INFO] Patient {vitals.patient_id} vitals normal.")
-            return
-
-        # 4. Create incident
-        incident_id = str(uuid.uuid4())
-        incident = Incident(
-            incident_id=incident_id,
+        # -------------------------------
+        # 3️⃣ Create Incident
+        # -------------------------------
+        incident = storage.create_incident(
             patient_id=vitals.patient_id,
-            status=IncidentStatus.SUSPECTED,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-            detected_pattern=analysis.detected_pattern
-        )
-        storage.create_incident(incident)
-
-        # 5. Medical recommendation
-        recommendation: MedicalRecommendation = self.medical_agent.recommend(
-            incident_id=incident_id,
-            analysis=analysis,
-            patient=patient
+            detected_pattern=rec.likely_condition,
+            triage_level=rec.triage_level,
+            likely_condition=rec.likely_condition,
         )
 
-        # update incident with triage info
-        storage.update_incident(
-            incident_id,
-            status=IncidentStatus.CONFIRMED_EMERGENCY
-            if recommendation.escalate_to_emergency
-            else IncidentStatus.SUSPECTED,
-            triage_level=recommendation.triage_level,
-            likely_condition=recommendation.likely_condition
-        )
+        print("[ORCHESTRATOR] Incident created:", incident.incident_id)
 
-        # 6. Routing (only if escalate_to_emergency and patient has location)
-        routing: Optional[RoutingDecision] = None
-        if recommendation.escalate_to_emergency and patient.location_lat and patient.location_lon:
-            routing = self.routing_agent.decide(
-                incident_id=incident_id,
-                lat=patient.location_lat,
-                lon=patient.location_lon,
-                emergency_type="cardiac"  # for now; in future map from condition
-            )
+        # -------------------------------
+        # 4️⃣ Routing (if emergency level)
+        # -------------------------------
+        routing = None
+        if rec.escalate_to_emergency:
+            routing = self.routing_agent.choose_hospital(patient, rec)
+            print("[ORCHESTRATOR] Routing decision:", routing)
+
             storage.update_incident(
-                incident_id,
+                incident_id=incident.incident_id,
                 chosen_hospital_id=routing.chosen_hospital_id,
-                eta_minutes=routing.eta_minutes
+                eta_minutes=routing.eta_minutes,
             )
 
-        # 7. Notification
-        notif_cmd = self.notification_agent.build_and_send(
-            rec=recommendation,
-            routing=routing,
-            patient=patient
-        )
+        # -------------------------------
+        # 5️⃣ Notifications
+        # -------------------------------
+        notify_cmd = self.notify_agent.build_and_send(rec, routing, patient)
 
-        storage.update_incident(
-            incident_id,
-            status=IncidentStatus.NOTIFICATIONS_SENT
-        )
+        print("[ORCHESTRATOR] Notifications sent:")
+        for n in notify_cmd.notify:
+            print("   >", n)
 
-        print(f"[ORCH] Incident {incident_id} processed. Notifications: {len(notif_cmd.notify)}")
+        # -------------------------------
+        # 6️⃣ Final log for judges/demo
+        # -------------------------------
+        print("\n🎯 INCIDENT SUMMARY")
+        print("- Incident ID:", incident.incident_id)
+        print("- Condition:", rec.likely_condition)
+        print("- Triage Level:", rec.triage_level)
+        print("- Confidence:", rec.confidence)
+        if routing:
+            print("- Routed to:", routing.chosen_hospital_name)
+            print("- ETA:", routing.eta_minutes, "mins")
+        print("- Explanation:", rec.explanation)
+        print("----------------------------------------------------\n")

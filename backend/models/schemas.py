@@ -43,6 +43,9 @@ class MedicalRecommendation(BaseModel):
     escalate_to_emergency: bool
     patient_instructions: List[str]
     caregiver_instructions: List[str]
+    confidence: float = 0.0
+    explanation: List[str] = Field(default_factory=list)
+
 
 
 class RoutingDecision(BaseModel):
