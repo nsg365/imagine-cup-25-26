@@ -5,6 +5,7 @@ from .config import settings
 from .models.schemas import VitalsInput, PatientProfile, Incident
 from .services import storage
 from .agents.orchestrator import OrchestratorAgent
+from fastapi import Body
 
 app = FastAPI(title=settings.PROJECT_NAME)
 orchestrator = OrchestratorAgent()
@@ -40,3 +41,15 @@ def get_incidents():
 
 
 # For dev: run "uvicorn backend.main:app --reload" from project root
+
+@app.post("/sos")
+def send_sos(patient_id: str = Body(..., embed=True), background_tasks: BackgroundTasks = None):
+    """
+    Manual SOS trigger. Sends SOS message with latest vitals + location.
+    """
+    if background_tasks:
+        background_tasks.add_task(orchestrator.handle_sos, patient_id)
+    else:
+        orchestrator.handle_sos(patient_id)
+
+    return {"status": "SOS triggered", "patient_id": patient_id}

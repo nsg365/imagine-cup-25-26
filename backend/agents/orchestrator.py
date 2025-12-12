@@ -99,3 +99,55 @@ class OrchestratorAgent:
             print("- ETA:", routing.eta_minutes, "mins")
         print("- Explanation:", rec.explanation)
         print("----------------------------------------------------\n")
+
+    def handle_sos(self, patient_id: str, vitals_snapshot: dict | None = None):
+        from datetime import datetime
+
+        # 1. Fetch Patient
+        patient = storage.get_patient(patient_id)
+        if not patient:
+            print(f"[SOS] No profile for {patient_id}")
+            return None
+
+        # 2. If no vitals provided, use last known vitals
+        if not vitals_snapshot:
+            last = None
+            for v in reversed(storage.VITALS_LOG):
+                if v.patient_id == patient_id:
+                    last = v
+                    break
+
+            if last:
+                vitals_snapshot = {
+                    "heart_rate": last.heart_rate,
+                    "spo2": last.spo2,
+                    "systolic_bp": last.systolic_bp,
+                    "diastolic_bp": last.diastolic_bp,
+                    "fall_flag": last.fall_flag
+                }
+            else:
+                vitals_snapshot = {}
+
+        # 3. Optional Routing
+        routing = None
+        if patient.location_lat and patient.location_lon:
+            try:
+                routing = self.routing_agent.decide(
+                    incident_id="sos-" + patient_id,
+                    lat=patient.location_lat,
+                    lon=patient.location_lon,
+                    emergency_type="cardiac"
+                )
+            except Exception as e:
+                print(f"[SOS] Routing error: {e}")
+
+        # 4. Send SOS notifications
+        notif = self.notification_agent.send_sos(
+            patient=patient,
+            vitals_snapshot=vitals_snapshot,
+            routing=routing,
+            incident_id="sos-" + patient_id
+        )
+
+        print(f"[SOS] Notifications sent for {patient_id}")
+        return notif
