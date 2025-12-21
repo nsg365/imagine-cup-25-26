@@ -1,13 +1,31 @@
 from fastapi import FastAPI, BackgroundTasks
 from typing import List
 
+from fastapi.middleware.cors import CORSMiddleware
+
 from .config import settings
 from .models.schemas import VitalsInput, PatientProfile, Incident
 from .services import storage
 from .agents.orchestrator import OrchestratorAgent
-from fastapi import Body
 
+# Create FastAPI app
 app = FastAPI(title=settings.PROJECT_NAME)
+
+# ------------ CORS FIX ------------
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# ----------------------------------
+
 orchestrator = OrchestratorAgent()
 
 
@@ -38,18 +56,3 @@ def submit_vitals(vitals: VitalsInput, background_tasks: BackgroundTasks):
 @app.get("/incidents", response_model=List[Incident])
 def get_incidents():
     return storage.list_incidents()
-
-
-# For dev: run "uvicorn backend.main:app --reload" from project root
-
-@app.post("/sos")
-def send_sos(patient_id: str = Body(..., embed=True), background_tasks: BackgroundTasks = None):
-    """
-    Manual SOS trigger. Sends SOS message with latest vitals + location.
-    """
-    if background_tasks:
-        background_tasks.add_task(orchestrator.handle_sos, patient_id)
-    else:
-        orchestrator.handle_sos(patient_id)
-
-    return {"status": "SOS triggered", "patient_id": patient_id}

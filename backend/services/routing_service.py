@@ -1,36 +1,29 @@
-from typing import List, Dict
-from math import sqrt
-
-# simple hospital "DB"
-HOSPITALS = [
-    {
-        "id": "H1",
-        "name": "City Cardiac Center",
-        "lat": 12.9716,
-        "lon": 77.5946,
-        "capabilities": ["cardiac", "icu"]
-    },
-    {
-        "id": "H2",
-        "name": "General Hospital",
-        "lat": 12.98,
-        "lon": 77.60,
-        "capabilities": ["general", "icu"]
-    },
-]
+from ..services.routing_service import RoutingService
 
 
-def _distance_sq(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    return (lat1 - lat2) ** 2 + (lon1 - lon2) ** 2
+class RoutingAgent:
 
+    def find_nearby_hospitals(self, patient):
+        """
+        Get hospitals near the patient's LAST known location.
+        If patient has no location → use fallback.
+        """
 
-def choose_hospital(lat: float, lon: float, emergency_type: str) -> Dict:
-    # filter by capability first
-    candidates = [h for h in HOSPITALS if emergency_type in h["capabilities"]] or HOSPITALS
-    chosen = min(
-        candidates,
-        key=lambda h: _distance_sq(lat, lon, h["lat"], h["lon"])
-    )
-    # fake ETA as distance * factor
-    eta = int(10 + 20 * _distance_sq(lat, lon, chosen["lat"], chosen["lon"]))
-    return chosen | {"eta_minutes": max(eta, 5)}
+        user_lat = patient.location_lat or 12.9716     # fallback (Bengaluru)
+        user_lon = patient.location_lon or 77.5946
+
+        print(f"[ROUTING] Using location: {user_lat}, {user_lon}")
+
+        hospitals = RoutingService.get_nearby_hospitals(user_lat, user_lon)
+        return hospitals
+
+    def choose_hospital(self, patient, hospitals):
+        """
+        Choose best hospital based on ETA.
+        """
+
+        user_lat = patient.location_lat or 12.9716
+        user_lon = patient.location_lon or 77.5946
+
+        best = RoutingService.choose_best_hospital(user_lat, user_lon, hospitals)
+        return best
