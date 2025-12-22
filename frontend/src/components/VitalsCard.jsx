@@ -1,19 +1,24 @@
+// src/components/VitalsCard.jsx
+import { Activity } from "lucide-react";
+
 export default function VitalsCard({ vitals }) {
-  if (!vitals) return null;
-
   return (
-    <div className="bg-white shadow rounded-lg p-4 border">
-      <h2 className="text-lg font-semibold mb-2">Vitals</h2>
+    <div className="bg-white shadow-sm p-6 rounded-xl border">
+      <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-gray-800">
+        <Activity className="text-green-600" size={22} />
+        Vitals
+      </h2>
 
-      <div className="space-y-1 text-gray-700">
-        <p><strong>Heart Rate:</strong> {vitals.heart_rate} bpm</p>
-        <p><strong>SpO₂:</strong> {vitals.spo2}%</p>
-        <p><strong>Blood Pressure:</strong> 
-          {vitals.systolic_bp}/{vitals.diastolic_bp}
-        </p>
-        <p><strong>Motion Flag:</strong> {vitals.motion_flag ? "Yes" : "No"}</p>
-        <p><strong>Fall Detected:</strong> {vitals.fall_flag ? "Yes" : "No"}</p>
-      </div>
+      {!vitals ? (
+        <p className="text-gray-500">No vitals available…</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 text-gray-700">
+          <p>Heart Rate: <span className="font-semibold">{vitals.heart_rate}</span></p>
+          <p>SpO₂: <span className="font-semibold">{vitals.spo2}</span></p>
+          <p>Temperature: <span className="font-semibold">{vitals.temperature}</span></p>
+          <p>BP: <span className="font-semibold">{vitals.bp}</span></p>
+        </div>
+      )}
     </div>
   );
 }

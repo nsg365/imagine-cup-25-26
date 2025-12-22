@@ -72,10 +72,12 @@ class OrchestratorAgent:
             print("[ORCHESTRATOR] Routing decision:", routing)
 
             storage.update_incident(
-                incident_id=incident.incident_id,
-                chosen_hospital_id=routing.chosen_hospital_id,
-                eta_minutes=routing.eta_minutes,
-            )
+            incident_id=incident.incident_id,
+            chosen_hospital_id=routing.chosen_hospital_id,
+            chosen_hospital_name=routing.chosen_hospital_name,
+            eta_minutes=routing.eta_minutes,
+            route_info=routing.route_info,
+    )
 
         # -------------------------------
         # 5️⃣ Notifications
