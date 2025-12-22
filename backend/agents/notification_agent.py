@@ -1,5 +1,6 @@
 from ..models.schemas import NotificationCommand, MedicalRecommendation, RoutingDecision, PatientProfile
 from ..services.notification import send_notification
+from backend.services.mapmyindia import get_hospital_phone_by_name
 
 class NotificationAgent:
     def build_and_send(self, rec: MedicalRecommendation, routing: RoutingDecision | None, patient: PatientProfile) -> NotificationCommand:
@@ -16,13 +17,21 @@ class NotificationAgent:
         # family / caregivers
         for contact in patient.emergency_contacts:
             msg = f"Emergency alert for {patient.name}. Likely: {rec.likely_condition}. "
+    
             if routing:
                 msg += f"Suggested hospital: {routing.chosen_hospital_name}, ETA ~{routing.eta_minutes} mins."
+
+                hosp_phone = get_hospital_phone_by_name(routing.chosen_hospital_name)
+                if hosp_phone:
+                    msg += f"\nHospital Phone: {hosp_phone}"
+
+
             commands.append({
                 "type": "sms",
                 "to": contact,
                 "message": msg
             })
+
 
         # hospital (if routing available)
         if routing:
@@ -76,10 +85,11 @@ Vitals:
             msg += f"\nLocation:\n{map_link}"
 
         if routing:
-            msg += f"\nSuggested Hospital:\n{routing.chosen_hospital_name} (ETA ~{routing.eta_minutes} mins)"
+                msg += f"Suggested hospital: {routing.chosen_hospital_name}, ETA ~{routing.eta_minutes} mins."
 
-        msg += f"\nTime: {datetime.utcnow().isoformat()}Z\nIncident ID: {incident_id or 'manual-sos'}"
-
+                hosp_phone = get_hospital_phone_by_name(routing.chosen_hospital_name)
+                if hosp_phone:
+                    msg += f"\nHospital Phone: {hosp_phone}"
         # Notification Commands
         commands = []
 
