@@ -1,5 +1,7 @@
 // src/pages/Dashboard.jsx
 import { useEffect, useState } from "react";
+import SidebarLayout from "../layout/SidebarLayout";
+
 import { getPatient, getIncidents } from "../api/backend";
 
 import VitalsCard from "../components/VitalsCard";
@@ -8,16 +10,19 @@ import EmergencyAlert from "../components/EmergencyAlert";
 import HospitalRouteCard from "../components/HospitalRouteCard";
 
 export default function Dashboard() {
-  const patientId = "Nihar";
+  const patientId = localStorage.getItem("patient_id");
 
   const [patient, setPatient] = useState(null);
   const [latestIncident, setLatestIncident] = useState(null);
   const [hospital, setHospital] = useState(null);
 
+  // Load patient profile
   useEffect(() => {
+    if (!patientId) return;
     getPatient(patientId).then(setPatient);
-  }, []);
+  }, [patientId]);
 
+  // Poll incidents every 2 sec
   useEffect(() => {
     const interval = setInterval(() => {
       getIncidents().then((data) => {
@@ -39,7 +44,10 @@ export default function Dashboard() {
             lat: incident.route_info.lat,
             lon: incident.route_info.lon,
             eta_minutes: incident.eta_minutes,
+            phone: incident.route_info.phone || null,
           });
+        } else {
+          setHospital(null);
         }
       });
     }, 2000);
@@ -48,28 +56,35 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8">
-      <h1 className="text-4xl font-bold mb-6 text-gray-800">
-        Welcome, <span className="text-blue-600">{patient?.name || "..."}</span>
+    <SidebarLayout>
+      <h1 className="text-4xl font-bold text-gray-800 mb-8">
+        Welcome,{" "}
+        <span className="text-blue-600">{patient?.name || "..."}</span>
       </h1>
 
       {/* Vitals + Contacts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div id="vitals" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <VitalsCard vitals={patient?.latest_vitals} />
         <ContactsList contacts={patient?.emergency_contacts || []} />
       </div>
 
-      {/* Hospital Route */}
-      {hospital && patient && (
-        <HospitalRouteCard
-          hospital={hospital}
-          patientLat={patient.location_lat}
-          patientLon={patient.location_lon}
-        />
-      )}
+      {/* ⭐⭐⭐ MAP + ROUTING SECTION — DO NOT REMOVE ⭐⭐⭐ */}
+      <div id="routing" className="mt-8">
+        {hospital && patient ? (
+          <HospitalRouteCard
+            hospital={hospital}
+            patientLat={patient.location_lat}
+            patientLon={patient.location_lon}
+          />
+        ) : (
+          <p className="text-gray-500 italic">No hospital route available…</p>
+        )}
+      </div>
 
-      {/* Emergency Alert */}
-      <EmergencyAlert incident={latestIncident} />
-    </div>
+      {/* Emergency */}
+      <div id="emergency" className="mt-8">
+        <EmergencyAlert incident={latestIncident} />
+      </div>
+    </SidebarLayout>
   );
 }
