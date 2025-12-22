@@ -1,17 +1,24 @@
+// src/components/ContactsList.jsx
+import { Phone } from "lucide-react";
+
 export default function ContactsList({ contacts }) {
   return (
-    <div className="bg-white shadow rounded-lg p-4 border">
-      <h2 className="text-lg font-semibold mb-2">Emergency Contacts</h2>
+    <div className="bg-white shadow-sm p-6 rounded-xl border">
+      <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+        Emergency Contacts
+      </h2>
 
-      {contacts?.length === 0 ? (
-        <p className="text-gray-500">No emergency contacts found.</p>
-      ) : (
-        <ul className="list-disc ml-6 text-gray-700">
-          {contacts.map((c, idx) => (
-            <li key={idx}>{c}</li>
-          ))}
-        </ul>
-      )}
+      <ul className="space-y-2">
+        {contacts.map((c, index) => (
+          <li
+            key={index}
+            className="flex items-center gap-3 text-gray-700 font-medium"
+          >
+            <Phone size={18} className="text-blue-600" />
+            {c}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

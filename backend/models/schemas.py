@@ -73,3 +73,5 @@ class Incident(BaseModel):
     likely_condition: Optional[str] = None
     chosen_hospital_id: Optional[str] = None
     eta_minutes: Optional[int] = None
+    chosen_hospital_name: Optional[str] = None
+    route_info: Optional[dict] = None

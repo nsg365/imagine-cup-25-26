@@ -1,36 +1,53 @@
+import { AlertTriangle } from "lucide-react";
+
 export default function EmergencyAlert({ incident }) {
   if (!incident) return null;
 
+  // Safe fallback values
+  const pattern = incident.pattern || "Unknown";
+  const triage = incident.triage_level || "N/A";
+  const nearestPhone =
+    incident?.route_info?.phone || incident?.hospital_phone || null;
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center">
-      <div className="bg-white shadow-xl rounded-xl p-6 max-w-md w-full">
-        <h2 className="text-2xl font-bold text-red-600">
-          🚨 EMERGENCY DETECTED
-        </h2>
+    <div className="bg-white shadow-md border border-red-300 rounded-lg p-5 mt-6">
+      <div className="flex items-center gap-3 text-red-700 font-bold text-xl">
+        <AlertTriangle size={26} />
+        EMERGENCY DETECTED
+      </div>
 
-        <p className="mt-2 text-gray-700">
-          Pattern: {incident.detected_pattern || "Unknown"}
+      <div className="mt-3 text-gray-700">
+        <p>
+          <strong>Pattern:</strong> {pattern}
         </p>
-
-        <p className="mt-1 text-gray-700">
-          Triage Level: {incident.triage_level ?? "-"}
+        <p className="mt-1">
+          <strong>Triage Level:</strong> {triage}
         </p>
+      </div>
 
-        <div className="mt-4 space-y-3">
-          <a
-            href="tel:108"
-            className="block w-full text-center bg-red-600 text-white font-semibold py-2 rounded-lg"
-          >
-            Call General Ambulance (108)
-          </a>
+      {/* Buttons */}
+      <div className="mt-4 flex flex-col gap-2">
+        {/* General ambulance */}
+        <a
+          href="tel:108"
+          className="text-blue-700 underline hover:text-blue-900"
+        >
+          Call General Ambulance (108)
+        </a>
 
+        {/* Nearest hospital ambulance */}
+        {nearestPhone ? (
           <a
-            href="tel:9844604339"
-            className="block w-full text-center bg-blue-600 text-white font-semibold py-2 rounded-lg"
+            href={`tel:${nearestPhone}`}
+            className="text-blue-700 underline hover:text-blue-900"
           >
             Call Nearest Hospital Ambulance
           </a>
-        </div>
+        ) : (
+          <span className="text-gray-500 italic">
+            Nearest hospital number unavailable
+          </span>
+        )}
       </div>
     </div>
   );
