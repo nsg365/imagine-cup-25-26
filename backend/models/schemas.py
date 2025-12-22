@@ -75,3 +75,15 @@ class Incident(BaseModel):
     eta_minutes: Optional[int] = None
     chosen_hospital_name: Optional[str] = None
     route_info: Optional[dict] = None
+
+class PatientRegisterInput(BaseModel):
+    name: str
+    age: int
+    emergency_contacts: List[str]
+    location_lat: float
+    location_lon: float
+    has_heart_disease: bool = False
+    has_diabetes: bool = False
+    baseline_hr_min: int = 60
+    baseline_hr_max: int = 100
+
