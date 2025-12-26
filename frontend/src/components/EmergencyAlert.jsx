@@ -1,83 +1,90 @@
 // src/components/EmergencyAlert.jsx
-import { AlertTriangle, MapPin, Phone } from "lucide-react";
+import { AlertTriangle, MapPin, Phone, Star } from "lucide-react";
 
 export default function EmergencyAlert({ incident }) {
-  if (!incident) return null;
+  if (!incident || incident.triage_level < 4) return null;
 
-  // Extract exactly the fields that exist in your backend
-  const condition = incident.likely_condition || incident.detected_pattern;
-  const triage = incident.triage_level;
-  const hospital = incident.chosen_hospital_name;
-  const eta = incident.eta_minutes;
+  const condition =
+    incident.likely_condition || incident.detected_pattern || "Unknown condition";
 
-  const address = incident.route_info?.address;
-  const rating = incident.route_info?.rating;
-  const reviews = incident.route_info?.reviews;
+  const {
+    triage_level,
+    chosen_hospital_name,
+    eta_minutes,
+    route_info = {},
+  } = incident;
+
+  const { address, rating, reviews, lat, lon } = route_info;
 
   return (
-    <div className="bg-white border border-red-300 shadow-lg rounded-xl p-6 mt-8">
+    <div className="card border-l-4 border-red-600 bg-red-50 emergency-pulse">
       {/* Header */}
-      <div className="flex items-center gap-3 text-red-700 font-bold text-2xl">
+      <div className="flex items-center gap-3 text-red-700 font-extrabold text-2xl">
         <AlertTriangle size={28} />
-        EMERGENCY DETECTED
+        Emergency Detected
       </div>
 
       {/* Condition */}
-      <p className="mt-3 text-gray-800 text-lg">
+      <p className="mt-4 text-slate-800 text-lg">
         <strong>Condition:</strong> {condition}
       </p>
 
       {/* Triage */}
-      <p className="mt-1 text-gray-800 text-lg">
-        <strong>Triage Level:</strong> {triage}
+      <p className="text-slate-800 text-lg">
+        <strong>Triage Level:</strong> {triage_level}
       </p>
 
-      {/* Hospital */}
-      {hospital && (
-        <p className="mt-3 text-gray-800 flex items-center gap-2">
-          <MapPin size={20} className="text-blue-600" />
-          <strong>Hospital:</strong> {hospital}
-        </p>
+      {/* Hospital Info */}
+      {chosen_hospital_name && (
+        <div className="mt-4 p-4 bg-white rounded-xl border space-y-1">
+          <p className="flex items-center gap-2 font-semibold text-slate-700">
+            <MapPin size={18} className="text-blue-600" />
+            {chosen_hospital_name}
+          </p>
+
+          {eta_minutes !== undefined && (
+            <p className="text-slate-600">
+              <strong>ETA:</strong> {eta_minutes} minutes
+            </p>
+          )}
+
+          {address && (
+            <p className="text-slate-600 text-sm">
+              <strong>Address:</strong> {address}
+            </p>
+          )}
+
+          {rating && (
+            <p className="flex items-center gap-1 text-slate-600 text-sm">
+              <Star size={14} className="text-yellow-500" />
+              {rating} ({reviews} reviews)
+            </p>
+          )}
+        </div>
       )}
 
-      {/* ETA */}
-      {eta !== undefined && (
-        <p className="text-gray-700 mt-1">
-          <strong>ETA:</strong> {eta} minutes
-        </p>
-      )}
-
-      {/* Address */}
-      {address && (
-        <p className="text-gray-700 mt-1">
-          <strong>Address:</strong> {address}
-        </p>
-      )}
-
-      {/* Rating */}
-      {rating && (
-        <p className="text-gray-700 mt-1">
-          <strong>Hospital Rating:</strong> ⭐ {rating} ({reviews} reviews)
-        </p>
-      )}
-
-      {/* Action Buttons */}
-      <div className="mt-5 flex flex-col gap-2">
+      {/* Actions */}
+      <div className="mt-6 flex flex-col gap-3">
         <a
           href="tel:108"
-          className="text-red-600 font-semibold hover:text-red-800 flex items-center gap-2"
+          className="btn btn-danger emergency-pulse flex items-center gap-2 justify-center"
         >
-          <Phone size={18} /> Call General Ambulance (108)
+          <Phone size={18} />
+          Call Ambulance (108)
         </a>
 
-        <a
-          href={`https://www.google.com/maps/dir/?api=1&destination=${incident.route_info?.lat},${incident.route_info?.lon}`}
-          target="_blank"
-          className="text-blue-600 font-semibold hover:text-blue-800"
-        >
-          Open Hospital Route in Google Maps
-        </a>
+        {lat && lon && (
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-primary text-center"
+          >
+            Open Route in Google Maps
+          </a>
+        )}
       </div>
     </div>
   );
 }
+

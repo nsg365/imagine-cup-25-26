@@ -14,16 +14,20 @@ export default function HospitalRouteMiniMap({
 
   useEffect(() => {
     if (!patientLat || !patientLon || !hospitalLat || !hospitalLon) return;
+    if (!mapContainerRef.current) return;
 
-    if (mapRef.current) {
-      mapRef.current.remove();
-      mapRef.current = null;
-    }
+    // Prevent double initialization
+    if (mapRef.current) return;
 
-    const map = L.map(mapContainerRef.current).setView(
-      [patientLat, patientLon],
-      13
-    );
+    const map = L.map(mapContainerRef.current, {
+      zoomControl: false,
+      scrollWheelZoom: false,
+      dragging: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      tap: false,
+    });
 
     mapRef.current = map;
 
@@ -31,38 +35,47 @@ export default function HospitalRouteMiniMap({
       attribution: "© OpenStreetMap contributors",
     }).addTo(map);
 
-    const patientIcon = new L.Icon({
+    const patientIcon = L.icon({
       iconUrl: "https://cdn-icons-png.flaticon.com/512/1077/1077012.png",
-      iconSize: [32, 32],
+      iconSize: [30, 30],
+      iconAnchor: [15, 30],
     });
 
-    const hospitalIcon = new L.Icon({
+    const hospitalIcon = L.icon({
       iconUrl: "https://cdn-icons-png.flaticon.com/512/1483/1483336.png",
-      iconSize: [32, 32],
+      iconSize: [30, 30],
+      iconAnchor: [15, 30],
     });
 
-    L.marker([patientLat, patientLon], { icon: patientIcon }).addTo(map);
-    L.marker([hospitalLat, hospitalLon], { icon: hospitalIcon }).addTo(map);
+    const patientMarker = L.marker([patientLat, patientLon], {
+      icon: patientIcon,
+    }).addTo(map);
 
-    L.polyline(
+    const hospitalMarker = L.marker([hospitalLat, hospitalLon], {
+      icon: hospitalIcon,
+    }).addTo(map);
+
+    const routeLine = L.polyline(
       [
         [patientLat, patientLon],
         [hospitalLat, hospitalLon],
       ],
-      { color: "blue", weight: 4 }
+      { color: "#2563eb", weight: 4 }
     ).addTo(map);
 
-    map.fitBounds([
-      [patientLat, patientLon],
-      [hospitalLat, hospitalLon],
-    ]);
+    map.fitBounds(routeLine.getBounds(), { padding: [20, 20] });
+
+    // Cleanup on unmount
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
   }, [patientLat, patientLon, hospitalLat, hospitalLon]);
 
   return (
     <div
       ref={mapContainerRef}
-      className="rounded-xl border shadow-sm overflow-hidden"
-      style={{ width: "100%", height: "320px" }}
+      className="rounded-xl border shadow-sm overflow-hidden w-full h-80"
     />
   );
 }

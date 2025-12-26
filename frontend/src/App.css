@@ -1,42 +1,176 @@
+/* =========================
+   Global Styles
+   ========================= */
+
+:root {
+  --primary: #2563eb;      /* blue */
+  --danger: #dc2626;       /* red */
+  --success: #16a34a;      /* green */
+  --bg: #f8fafc;           /* light background */
+  --card-bg: #ffffff;
+  --text: #0f172a;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  color: var(--text);
+}
+
+/* =========================
+   App Root
+   ========================= */
+
 #root {
-  max-width: 1280px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2.5rem 1.5rem;
   text-align: center;
 }
 
+/* =========================
+   Logo Styling
+   ========================= */
+
 .logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+  height: 5.5em;
+  padding: 1.2em;
+  transition: transform 300ms ease, filter 300ms ease;
 }
+
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 1.5em rgba(37, 99, 235, 0.5));
 }
+
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 1.5em rgba(97, 218, 251, 0.6));
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* =========================
+   Headings
+   ========================= */
+
+h1 {
+  font-size: 2.4rem;
+  margin-bottom: 0.5rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+h2 {
+  margin-top: 2rem;
+  font-size: 1.8rem;
 }
+
+h3 {
+  margin-top: 1.5rem;
+  font-size: 1.3rem;
+}
+
+/* =========================
+   Cards
+   ========================= */
 
 .card {
-  padding: 2em;
+  background: var(--card-bg);
+  border-radius: 14px;
+  padding: 2rem;
+  margin: 1.5rem auto;
+  max-width: 600px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transition: transform 200ms ease, box-shadow 200ms ease;
 }
 
-.read-the-docs {
-  color: #888;
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
 }
+
+/* =========================
+   Buttons
+   ========================= */
+
+button {
+  border-radius: 10px;
+  border: none;
+  padding: 0.7em 1.5em;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--primary);
+  color: white;
+  transition: transform 150ms ease, box-shadow 150ms ease, background 150ms;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+  background: #1d4ed8;
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Emergency button */
+button.danger {
+  background: var(--danger);
+}
+
+button.danger:hover {
+  background: #b91c1c;
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.4);
+}
+
+/* =========================
+   Status Badges
+   ========================= */
+
+.badge {
+  display: inline-block;
+  padding: 0.4em 0.9em;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge.emergency {
+  background: rgba(220, 38, 38, 0.15);
+  color: var(--danger);
+}
+
+.badge.normal {
+  background: rgba(22, 163, 74, 0.15);
+  color: var(--success);
+}
+
+/* =========================
+   Info Text
+   ========================= */
+
+.read-the-docs {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-top: 2rem;
+}
+
+/* =========================
+   Animations
+   ========================= */
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(220, 38, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
+.emergency-pulse {
+  animation: pulse 1.5s infinite;
+}
+

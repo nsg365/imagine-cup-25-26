@@ -3,36 +3,66 @@
 const API_BASE = "http://127.0.0.1:8000";
 
 // ----------------------
-//  REGISTER PATIENT
+// REGISTER PATIENT
 // ----------------------
 export async function registerPatient(patientData) {
-  const res = await fetch(`${API_BASE}/patients`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(patientData),
-  });
+  try {
+    const res = await fetch(`${API_BASE}/patients`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(patientData),
+    });
 
-  if (!res.ok) {
-    throw new Error("Failed to register patient");
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Backend-provided error (FastAPI detail)
+      throw new Error(data.detail || "Patient registration failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("❌ Register Patient Error:", error.message);
+    throw error;
   }
-
-  return res.json();
 }
 
 // ----------------------
-//  GET PATIENT BY ID
+// GET PATIENT BY ID
 // ----------------------
 export async function getPatient(patientId) {
-  const res = await fetch(`${API_BASE}/patients/${patientId}`);
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/patients/${patientId}`);
+
+    if (!res.ok) {
+      if (res.status === 404) return null;
+      throw new Error("Failed to fetch patient");
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("❌ Get Patient Error:", error.message);
+    return null;
+  }
 }
 
 // ----------------------
-//  GET VITALS + INCIDENTS
+// GET INCIDENTS
 // ----------------------
 export async function getIncidents() {
-  const res = await fetch(`${API_BASE}/incidents`);
-  if (!res.ok) return [];
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/incidents`);
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch incidents");
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("❌ Get Incidents Error:", error.message);
+    return [];
+  }
 }
+
