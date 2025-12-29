@@ -1,11 +1,11 @@
-# backend/models/schemas.py
-
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict
 from datetime import datetime
 from .incident_state import IncidentStatus
 
-
+# ---------------------------
+# VITALS INPUT
+# ---------------------------
 class VitalsInput(BaseModel):
     patient_id: str
     heart_rate: float = Field(..., gt=0)
@@ -17,19 +17,42 @@ class VitalsInput(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 
-class PatientProfile(BaseModel):
-    patient_id: Optional[str] = None
+# ---------------------------
+# PATIENT REGISTRATION INPUT
+# (NO patient_id here)
+# ---------------------------
+class PatientCreate(BaseModel):
     name: str
     age: int
+    emergency_contacts: List[str]
+    location_lat: Optional[float] = None
+    location_lon: Optional[float] = None
     has_heart_disease: bool = False
     has_diabetes: bool = False
     baseline_hr_min: int = 60
     baseline_hr_max: int = 100
-    emergency_contacts: List[str] = Field(default_factory=list)
+
+
+# ---------------------------
+# STORED / RETURNED PATIENT
+# (patient_id REQUIRED)
+# ---------------------------
+class PatientProfile(BaseModel):
+    patient_id: str
+    name: str
+    age: int
+    emergency_contacts: List[str]
     location_lat: Optional[float] = None
     location_lon: Optional[float] = None
+    has_heart_disease: bool = False
+    has_diabetes: bool = False
+    baseline_hr_min: int = 60
+    baseline_hr_max: int = 100
 
 
+# ---------------------------
+# ANALYSIS + INCIDENTS
+# ---------------------------
 class VitalAnalysisResult(BaseModel):
     patient_id: str
     status: str
@@ -73,41 +96,15 @@ class Incident(BaseModel):
     triage_level: Optional[int] = None
     likely_condition: Optional[str] = None
     chosen_hospital_id: Optional[str] = None
-    eta_minutes: Optional[int] = None
     chosen_hospital_name: Optional[str] = None
-    route_info: Optional[dict] = None
+    eta_minutes: Optional[int] = None
+    route_info: Optional[Dict] = None
 
 
-class PatientRegisterInput(BaseModel):
-    name: str
-    age: int
-    emergency_contacts: List[str]
-    location_lat: float
-    location_lon: float
-    has_heart_disease: bool = False
-    has_diabetes: bool = False
-    baseline_hr_min: int = 60
-    baseline_hr_max: int = 100
-
-
-# ✅ ADD THIS (Manual SOS payload)
+# ---------------------------
+# MANUAL SOS
+# ---------------------------
 class ManualSOSInput(BaseModel):
     patient_id: str
 
-class PatientCreate(BaseModel):
-    name: str
-    age: int
-    emergency_contacts: list[str]
-    location_lat: float | None = None
-    location_lon: float | None = None
-
-
-class PatientProfile(BaseModel):
-
-    patient_id: str
-    name: str
-    age: int
-    emergency_contacts: list[str]
-    location_lat: float | None = None
-    location_lon: float | None = None
 
