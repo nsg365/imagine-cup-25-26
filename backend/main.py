@@ -64,6 +64,17 @@ def register_patient(profile: PatientCreate):
 
     return storage.save_patient(patient)
 
+    patient = PatientProfile(
+        patient_id=patient_id,
+        name=profile.name,
+        age=profile.age,
+        emergency_contacts=profile.emergency_contacts,
+        location_lat=profile.location_lat,
+        location_lon=profile.location_lon,
+    )
+
+    return storage.save_patient(patient)
+
 
 def register_patient(profile: PatientProfile):
     return storage.save_patient(profile)

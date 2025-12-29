@@ -104,6 +104,7 @@ class PatientCreate(BaseModel):
 
 class PatientProfile(BaseModel):
 
+    patient_id: str
     name: str
     age: int
     emergency_contacts: list[str]
