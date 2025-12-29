@@ -89,15 +89,11 @@ class PatientRegisterInput(BaseModel):
     baseline_hr_min: int = 60
     baseline_hr_max: int = 100
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 
 # ✅ ADD THIS (Manual SOS payload)
 class ManualSOSInput(BaseModel):
     patient_id: str
-=======
-=======
->>>>>>> Stashed changes
+
 class PatientCreate(BaseModel):
     name: str
     age: int
@@ -107,13 +103,10 @@ class PatientCreate(BaseModel):
 
 
 class PatientProfile(BaseModel):
-    patient_id: str
+
     name: str
     age: int
     emergency_contacts: list[str]
     location_lat: float | None = None
     location_lon: float | None = None
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
