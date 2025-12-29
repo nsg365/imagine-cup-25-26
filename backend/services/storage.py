@@ -10,18 +10,16 @@ INCIDENTS: Dict[str, Incident] = {}
 VITALS_LOG: List[VitalsInput] = []
 
 
-def save_patient(profile: PatientProfile) -> PatientProfile:
-    PATIENTS[profile.patient_id] = profile
-    return profile
+class Storage:
+    def __init__(self):
+        self.patients = {}
 
+    def save_patient(self, patient):
+        self.patients[patient.patient_id] = patient
+        return patient
 
-def get_patient(patient_id: str) -> Optional[PatientProfile]:
-    return PATIENTS.get(patient_id)
-
-
-def save_vitals(vitals: VitalsInput) -> VitalsInput:
-    VITALS_LOG.append(vitals)
-    return vitals
+    def get_patient(self, patient_id):
+        return self.patients.get(patient_id)
 
 
 def create_incident(

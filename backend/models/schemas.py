@@ -18,7 +18,7 @@ class VitalsInput(BaseModel):
 
 
 class PatientProfile(BaseModel):
-    patient_id: str
+    patient_id: Optional[str] = None
     name: str
     age: int
     has_heart_disease: bool = False
@@ -89,7 +89,25 @@ class PatientRegisterInput(BaseModel):
     baseline_hr_min: int = 60
     baseline_hr_max: int = 100
 
+<<<<<<< Updated upstream
 
 # ✅ ADD THIS (Manual SOS payload)
 class ManualSOSInput(BaseModel):
     patient_id: str
+=======
+class PatientCreate(BaseModel):
+    name: str
+    age: int
+    emergency_contacts: list[str]
+    location_lat: float | None = None
+    location_lon: float | None = None
+
+
+class PatientProfile(BaseModel):
+    patient_id: str
+    name: str
+    age: int
+    emergency_contacts: list[str]
+    location_lat: float | None = None
+    location_lon: float | None = None
+>>>>>>> Stashed changes

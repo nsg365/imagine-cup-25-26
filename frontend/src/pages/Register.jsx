@@ -7,7 +7,6 @@ export default function Register() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    patient_id: "",
     name: "",
     age: "",
     emergency_contacts: "",
@@ -47,18 +46,24 @@ export default function Register() {
     e.preventDefault();
 
     const payload = {
-      ...form,
+      name: form.name,
       age: Number(form.age),
       emergency_contacts: form.emergency_contacts
         .split(",")
         .map((x) => x.trim()),
+      location_lat: form.location_lat,
+      location_lon: form.location_lon,
     };
 
+
     try {
-      await registerPatient(payload);
-      alert("Patient registered successfully!");
+      const data = await registerPatient(payload);
+        // 🔐 Save generated patient ID
+      localStorage.setItem("patient_id", data.patient_id);
+      alert(`Patient registered! ID: ${data.patient_id}`);
+      alert(`Your Patient ID is ${data.patient_id}. Please save it.`);
       navigate("/dashboard");
-    } catch (err) {
+      } catch (err) {
       alert("Registration failed.");
       console.error(err);
     }
@@ -71,18 +76,6 @@ export default function Register() {
         className="w-full max-w-lg bg-white shadow-md rounded-xl p-6"
       >
         <h1 className="text-2xl font-bold mb-4">Register New Patient</h1>
-
-        {/* Patient ID */}
-        <label className="block mb-2 font-semibold">Patient ID</label>
-        <input
-          type="text"
-          value={form.patient_id}
-          onChange={(e) =>
-            setForm({ ...form, patient_id: e.target.value })
-          }
-          className="w-full p-2 border rounded mb-4"
-          required
-        />
 
         {/* Name */}
         <label className="block mb-2 font-semibold">Name</label>

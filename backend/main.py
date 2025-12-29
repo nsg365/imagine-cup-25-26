@@ -17,8 +17,16 @@ from .models.schemas import (
 from .services import storage
 from .services.notification import send_notification
 from .agents.orchestrator import OrchestratorAgent
+<<<<<<< Updated upstream
 from .models.incident_state import IncidentStatus
 
+=======
+import uuid
+from backend.models.schemas import PatientCreate, PatientProfile
+from backend.services.storage import Storage
+
+storage = Storage()
+>>>>>>> Stashed changes
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -46,8 +54,24 @@ def read_root():
 
 
 @app.post("/patients", response_model=PatientProfile)
+<<<<<<< Updated upstream
 def register_patient(profile: PatientProfile):
     return storage.save_patient(profile)
+=======
+def register_patient(profile: PatientCreate):
+    patient_id = f"p-{uuid.uuid4().hex[:8]}"
+
+    patient = PatientProfile(
+        patient_id=patient_id,
+        name=profile.name,
+        age=profile.age,
+        emergency_contacts=profile.emergency_contacts,
+        location_lat=profile.location_lat,
+        location_lon=profile.location_lon,
+    )
+
+    return storage.save_patient(patient)
+>>>>>>> Stashed changes
 
 
 @app.get("/patients/{patient_id}", response_model=PatientProfile | None)
