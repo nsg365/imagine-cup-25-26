@@ -3,11 +3,16 @@ import axios from "axios";
 
 export default function Emergency() {
   async function triggerSOS() {
-    await axios.post("http://127.0.0.1:8000/sos/manual", {
-      patient_id: "p1",
-    });
+    try {
+      await axios.post("http://127.0.0.1:8000/sos/manual", {
+        patient_id: "p1"
+      });
 
-    alert("🚨 SOS sent successfully!");
+      alert("🚨 SOS sent successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Failed to send SOS");
+    }
   }
 
   return (

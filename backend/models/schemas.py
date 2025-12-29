@@ -1,3 +1,5 @@
+# backend/models/schemas.py
+
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict
 from datetime import datetime
@@ -47,7 +49,6 @@ class MedicalRecommendation(BaseModel):
     explanation: List[str] = Field(default_factory=list)
 
 
-
 class RoutingDecision(BaseModel):
     incident_id: str
     chosen_hospital_id: str
@@ -76,6 +77,7 @@ class Incident(BaseModel):
     chosen_hospital_name: Optional[str] = None
     route_info: Optional[dict] = None
 
+
 class PatientRegisterInput(BaseModel):
     name: str
     age: int
@@ -87,3 +89,7 @@ class PatientRegisterInput(BaseModel):
     baseline_hr_min: int = 60
     baseline_hr_max: int = 100
 
+
+# ✅ ADD THIS (Manual SOS payload)
+class ManualSOSInput(BaseModel):
+    patient_id: str

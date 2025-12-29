@@ -14,3 +14,7 @@ venv/
 # Logs
 *.log
 *.zip
+
+# Environment variables (DO NOT COMMIT)
+.env
+backend/.env

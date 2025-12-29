@@ -5,4 +5,6 @@ class IncidentStatus(str, Enum):
     SUSPECTED = "SUSPECTED"
     CONFIRMED_EMERGENCY = "CONFIRMED_EMERGENCY"
     NOTIFICATIONS_SENT = "NOTIFICATIONS_SENT"
+    EMERGENCY = "emergency"
+    CRITICAL = "critical"
     RESOLVED = "RESOLVED"

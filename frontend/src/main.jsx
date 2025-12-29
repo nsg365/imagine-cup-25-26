@@ -12,6 +12,9 @@ import Reasoning from "./pages/Reasoning";
 
 import "./index.css";
 
+// ✅ ADD THIS LINE
+import "leaflet/dist/leaflet.css";
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -28,4 +31,3 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </BrowserRouter>
   </React.StrictMode>
 );
-
