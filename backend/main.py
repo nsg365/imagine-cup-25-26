@@ -26,7 +26,8 @@ from .agents.orchestrator import OrchestratorAgent
 app = FastAPI(title=settings.PROJECT_NAME)
 
 storage = Storage()
-orchestrator = OrchestratorAgent()
+orchestrator = OrchestratorAgent(storage)
+
 
 # -----------------------------
 # CORS
@@ -141,10 +142,17 @@ def get_incidents():
 
 @app.post("/sos/manual")
 def manual_sos(payload: ManualSOSInput):
+
+    # 1️⃣ Fetch patient
+    patient = storage.get_patient(payload.patient_id)
+    if not patient:
+        return {"error": "Patient not found"}
+
+    # 2️⃣ Compose SOS message (use NAME, not ID)
     message = f"""
 🚨 EMERGENCY SOS 🚨
 
-Patient ID: {payload.patient_id}
+Patient: {patient.name}
 
 The patient has manually activated
 Emergency SOS and is not feeling well.
@@ -152,7 +160,7 @@ Emergency SOS and is not feeling well.
 Immediate assistance is required.
 """.strip()
 
-    # 1️⃣ Send notification (DO NOT FAIL SOS)
+    # 3️⃣ Send notification (DO NOT FAIL SOS)
     try:
         send_notification([
             {
@@ -163,7 +171,7 @@ Immediate assistance is required.
     except Exception as e:
         print(f"[WARNING] Notification failed: {e}")
 
-    # 2️⃣ Store incident (best-effort)
+    # 4️⃣ Store incident (best-effort)
     try:
         incident = storage.create_incident(
             patient_id=payload.patient_id,

@@ -1,5 +1,4 @@
 from ..models.schemas import VitalsInput, PatientProfile
-from ..services import storage
 from ..services.notification import send_notification
 from .medical_agent import MedicalRecommendationAgent
 from .notification_agent import NotificationAgent
@@ -17,7 +16,8 @@ class OrchestratorAgent:
     - Handles manual SOS
     """
 
-    def __init__(self):
+    def __init__(self,storage):
+        self.storage = storage
         self.med_agent = MedicalRecommendationAgent()
         self.notify_agent = NotificationAgent()
         self.routing_agent = RoutingAgent()
@@ -88,13 +88,13 @@ ETA: {routing.eta_minutes} minutes
             print("    •", x)
 
         # 2️⃣ Load patient
-        patient = storage.get_patient(vitals.patient_id)
+        patient = self.storage.get_patient(vitals.patient_id)
         if not patient:
             print("[ORCHESTRATOR] ERROR: Patient record not found.")
             return
 
         # 3️⃣ Create incident
-        incident = storage.create_incident(
+        incident = self.storage.create_incident(
             patient_id=vitals.patient_id,
             detected_pattern=rec.likely_condition,
             triage_level=rec.triage_level,
@@ -110,7 +110,7 @@ ETA: {routing.eta_minutes} minutes
 
             print("[ORCHESTRATOR] Routing decision:", routing)
 
-            storage.update_incident(
+            self.storage.update_incident(
                 incident_id=incident.incident_id,
                 chosen_hospital_id=routing.chosen_hospital_id,
                 chosen_hospital_name=routing.chosen_hospital_name,
@@ -152,7 +152,7 @@ ETA: {routing.eta_minutes} minutes
     def handle_sos(self, patient_id: str, vitals_snapshot: dict | None = None):
 
         # 1️⃣ Fetch patient
-        patient = storage.get_patient(patient_id)
+        patient = self.storage.get_patient(patient_id)
         if not patient:
             print(f"[SOS] No profile for {patient_id}")
             return None
@@ -160,7 +160,7 @@ ETA: {routing.eta_minutes} minutes
         # 2️⃣ Use last known vitals if not provided
         if not vitals_snapshot:
             last = None
-            for v in reversed(storage.VITALS_LOG):
+            for v in reversed(self.storage.VITALS_LOG):
                 if v.patient_id == patient_id:
                     last = v
                     break
