@@ -21,6 +21,8 @@ class VitalsInput(BaseModel):
 # PATIENT REGISTRATION INPUT
 # (NO patient_id here)
 # ---------------------------
+
+    
 class PatientCreate(BaseModel):
     name: str
     age: int
@@ -31,6 +33,9 @@ class PatientCreate(BaseModel):
     has_diabetes: bool = False
     baseline_hr_min: int = 60
     baseline_hr_max: int = 100
+
+    password: str  # ✅ ADDED
+
 
 
 # ---------------------------

@@ -1,6 +1,10 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+from .auth.routes import router as auth_router
+from .auth.auth_db import init_auth_db, store_user_credentials
+from .services.auth_storage import store_password
+from .auth.auth_db import init_auth_db
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
@@ -24,6 +28,11 @@ from .agents.orchestrator import OrchestratorAgent
 # APP INIT
 # -----------------------------
 app = FastAPI(title=settings.PROJECT_NAME)
+
+init_auth_db()
+app.include_router(auth_router)
+
+
 
 storage = Storage()
 orchestrator = OrchestratorAgent(storage)
@@ -70,7 +79,17 @@ def register_patient(payload: PatientCreate):
         baseline_hr_max=payload.baseline_hr_max,
     )
 
-    return storage.save_patient(patient)
+    # 1️⃣ Store patient profile (memory for now)
+    storage.save_patient(patient)
+
+    # 2️⃣ Store credentials (SQLite)
+    store_user_credentials(
+        patient_id=patient_id,
+        password=payload.password
+    )
+
+    return patient
+
 
 # =============================
 # 👤 GET PATIENT

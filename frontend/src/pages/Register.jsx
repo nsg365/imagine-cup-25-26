@@ -12,12 +12,15 @@ export default function Register() {
     emergency_contacts: "",
     location_lat: "",
     location_lon: "",
+    password: "",
+    confirm_password: "",
   });
 
   const [locStatus, setLocStatus] = useState("Detecting location...");
+  const [error, setError] = useState("");
 
   // -----------------------------
-  // AUTO-DETECT LOCATION HERE
+  // AUTO-DETECT LOCATION
   // -----------------------------
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -34,16 +37,28 @@ export default function Register() {
         }));
         setLocStatus("Location detected ✔");
       },
-      (err) => {
-        console.error(err);
-        setLocStatus("Unable to fetch location. Please allow permission.");
+      () => {
+        setLocStatus("Unable to fetch location.");
       }
     );
   }, []);
 
-  // Form submit handler
+  // -----------------------------
+  // SUBMIT
+  // -----------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
+    if (form.password !== form.confirm_password) {
+      setError("Passwords do not match");
+      return;
+    }
 
     const payload = {
       name: form.name,
@@ -53,19 +68,17 @@ export default function Register() {
         .map((x) => x.trim()),
       location_lat: form.location_lat,
       location_lon: form.location_lon,
+      password: form.password,
     };
-
 
     try {
       const data = await registerPatient(payload);
-        // 🔐 Save generated patient ID
       localStorage.setItem("patient_id", data.patient_id);
-      alert(`Patient registered! ID: ${data.patient_id}`);
-      alert(`Your Patient ID is ${data.patient_id}. Please save it.`);
+      alert(`Registered successfully. Your ID: ${data.patient_id}`);
       navigate("/dashboard");
-      } catch (err) {
-      alert("Registration failed.");
+    } catch (err) {
       console.error(err);
+      setError("Registration failed.");
     }
   };
 
@@ -77,75 +90,86 @@ export default function Register() {
       >
         <h1 className="text-2xl font-bold mb-4">Register New Patient</h1>
 
-        {/* Name */}
+        {error && <p className="text-red-600 mb-3">{error}</p>}
+
         <label className="block mb-2 font-semibold">Name</label>
         <input
           type="text"
-          value={form.name}
-          onChange={(e) =>
-            setForm({ ...form, name: e.target.value })
-          }
-          className="w-full p-2 border rounded mb-4"
           required
+          className="w-full p-2 border rounded mb-4"
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
 
-        {/* Age */}
         <label className="block mb-2 font-semibold">Age</label>
         <input
           type="number"
-          value={form.age}
-          onChange={(e) =>
-            setForm({ ...form, age: e.target.value })
-          }
-          className="w-full p-2 border rounded mb-4"
           required
+          className="w-full p-2 border rounded mb-4"
+          onChange={(e) => setForm({ ...form, age: e.target.value })}
         />
 
-        {/* Contacts */}
         <label className="block mb-2 font-semibold">
           Emergency Contacts (comma separated)
         </label>
         <input
           type="text"
-          value={form.emergency_contacts}
+          required
+          className="w-full p-2 border rounded mb-4"
           onChange={(e) =>
             setForm({ ...form, emergency_contacts: e.target.value })
           }
-          className="w-full p-2 border rounded mb-4"
-          required
         />
 
-        {/* Auto Location Display */}
+        {/* PASSWORDS */}
+        <label className="block mb-2 font-semibold">Password</label>
+        <input
+          type="password"
+          required
+          className="w-full p-2 border rounded mb-4"
+          onChange={(e) =>
+            setForm({ ...form, password: e.target.value })
+          }
+        />
+
+        <label className="block mb-2 font-semibold">Confirm Password</label>
+        <input
+          type="password"
+          required
+          className="w-full p-2 border rounded mb-4"
+          onChange={(e) =>
+            setForm({ ...form, confirm_password: e.target.value })
+          }
+        />
+
         <p className="text-sm text-blue-600 mb-2">{locStatus}</p>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1 font-semibold">Latitude</label>
-            <input
-              type="text"
-              value={form.location_lat}
-              readOnly
-              className="w-full p-2 border rounded bg-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1 font-semibold">Longitude</label>
-            <input
-              type="text"
-              value={form.location_lon}
-              readOnly
-              className="w-full p-2 border rounded bg-gray-100"
-            />
-          </div>
+          <input
+            readOnly
+            value={form.location_lat}
+            className="p-2 border rounded bg-gray-100"
+          />
+          <input
+            readOnly
+            value={form.location_lon}
+            className="p-2 border rounded bg-gray-100"
+          />
         </div>
 
-        <button
-          type="submit"
-          className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-semibold"
-        >
+        <button className="w-full mt-6 bg-blue-600 text-white p-3 rounded-lg">
           Register Patient
         </button>
+
+        {/* LOGIN NAVIGATION */}
+        <p className="text-center mt-4 text-sm text-gray-600">
+          Already registered?{" "}
+          <span
+            onClick={() => navigate("/login")}
+            className="text-blue-600 cursor-pointer hover:underline"
+          >
+            Login here
+          </span>
+        </p>
       </form>
     </div>
   );

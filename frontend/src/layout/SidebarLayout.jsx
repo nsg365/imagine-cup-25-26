@@ -1,3 +1,4 @@
+// src/layout/SidebarLayout.jsx
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -14,11 +15,11 @@ export default function SidebarLayout({ children }) {
 
   const menu = [
     { name: "Dashboard", icon: <LayoutDashboard size={18} />, to: "/dashboard" },
-    { name: "Vitals", icon: <Activity size={18} />, to: "/vitals" },
-    { name: "Routing", icon: <Map size={18} />, to: "/routing" },
-    { name: "Emergency SOS", icon: <AlertTriangle size={18} />, to: "/emergency" },
-    { name: "Incident History", icon: <History size={18} />, to: "/history" },
-    { name: "AI Reasoning", icon: <Brain size={18} />, to: "/reasoning" },
+    { name: "Vitals", icon: <Activity size={18} />, to: "/dashboard/vitals" },
+    { name: "Routing", icon: <Map size={18} />, to: "/dashboard/routing" },
+    { name: "Emergency SOS", icon: <AlertTriangle size={18} />, to: "/dashboard/emergency" },
+    { name: "Incident History", icon: <History size={18} />, to: "/dashboard/incidents" },
+    { name: "AI Reasoning", icon: <Brain size={18} />, to: "/dashboard/reasoning" },
     { name: "Register", icon: <UserPlus size={18} />, to: "/register" },
   ];
 
@@ -35,9 +36,9 @@ export default function SidebarLayout({ children }) {
               key={item.to}
               to={item.to}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition
-              ${pathname === item.to
-                ? "bg-blue-100 text-blue-700"
-                : "text-gray-700 hover:bg-gray-200"}`}
+                ${pathname === item.to
+                  ? "bg-blue-100 text-blue-700"
+                  : "text-gray-700 hover:bg-gray-200"}`}
             >
               {item.icon}
               {item.name}
@@ -46,8 +47,9 @@ export default function SidebarLayout({ children }) {
         </nav>
       </div>
 
-      <div className="flex-1 p-10">{children}</div>
+      <div className="flex-1 p-10 overflow-y-auto">
+        {children}
+      </div>
     </div>
   );
 }
-
