@@ -115,6 +115,14 @@ def submit_vitals(vitals: VitalsInput, background_tasks: BackgroundTasks):
 def get_incidents():
     return storage.list_incidents()
 
+@app.get("/vitals/{patient_id}")
+def get_latest_vitals(patient_id: str):
+    vitals = storage.get_latest_vitals(patient_id)
+    if not vitals:
+        return None
+    return vitals
+
+
 
 # ============================
 # 🚨 MANUAL SOS ENDPOINT
@@ -207,8 +215,6 @@ Immediate assistance is required.
 
     return {"status": "Manual SOS sent"}
 
-@app.get("/vitals/{patient_id}")
-def get_latest_vitals(patient_id: str):
-    return storage.get_latest_vitals(patient_id)
+
 
 
