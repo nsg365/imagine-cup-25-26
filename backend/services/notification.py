@@ -3,6 +3,8 @@
 from typing import List, Dict
 from ..twilio_config import client, TWILIO_NUMBER
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 EMERGENCY_PHONE = os.getenv("EMERGENCY_PHONE")
 print("EMERGENCY_PHONE =", EMERGENCY_PHONE)
