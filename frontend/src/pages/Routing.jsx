@@ -7,17 +7,23 @@ export default function Routing() {
   const [incident, setIncident] = useState(null);
   const [patient, setPatient] = useState(null);
 
-  const PATIENT_ID = "p1"; // replace later with logged-in patient
+  const patientId = localStorage.getItem("patient_id"); // set after registration
 
-  // Fetch patient (for location)
+  // -----------------------------
+  // Fetch patient profile (location)
+  // -----------------------------
   useEffect(() => {
-    axios
-      .get(`http://127.0.0.1:8000/patients/${PATIENT_ID}`)
-      .then((res) => setPatient(res.data))
-      .catch(() => {});
-  }, []);
+    if (!patientId) return;
 
-  // Fetch latest incident
+    axios
+      .get(`http://127.0.0.1:8000/patients/${patientId}`)
+      .then((res) => setPatient(res.data))
+      .catch(() => setPatient(null));
+  }, [patientId]);
+
+  // -----------------------------
+  // Fetch latest routing decision
+  // -----------------------------
   useEffect(() => {
     axios
       .get("http://127.0.0.1:8000/incidents")
@@ -28,6 +34,17 @@ export default function Routing() {
       })
       .catch(() => {});
   }, []);
+
+  // -----------------------------
+  // UI STATES
+  // -----------------------------
+  if (!patient) {
+    return (
+      <div className="max-w-4xl mx-auto mt-20 text-slate-600 text-lg">
+        No patient location available.
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -41,7 +58,7 @@ export default function Routing() {
             No routing decision yet.
           </p>
           <p className="text-slate-500 mt-2">
-            Routing appears automatically during emergencies.
+            Routing is triggered automatically during emergencies.
           </p>
         </div>
       ) : (
@@ -51,12 +68,14 @@ export default function Routing() {
             eta_minutes: incident.eta_minutes,
             lat: incident.route_info?.lat,
             lon: incident.route_info?.lon,
+            address: incident.route_info?.address,
+            rating: incident.route_info?.rating,
+            reviews: incident.route_info?.reviews,
           }}
-          patientLat={patient?.location_lat}
-          patientLon={patient?.location_lon}
+          patientLat={patient.location_lat}
+          patientLon={patient.location_lon}
         />
       )}
     </div>
   );
 }
-
