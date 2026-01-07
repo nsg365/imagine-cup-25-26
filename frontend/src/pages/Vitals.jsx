@@ -1,15 +1,22 @@
-import VitalsCard from "../components/VitalsCard";
-
 export default function Vitals() {
-  return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold">Vitals Monitoring</h1>
+  const patientId = localStorage.getItem("patient_id");
 
-      <VitalsCard vitals={null} />
+  const [vitals, setVitals] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-      <p className="text-slate-500">
-        Live vitals will appear here when data is received from the device.
-      </p>
-    </div>
-  );
+  useEffect(() => {
+    if (!patientId) return;
+
+    const poller = setInterval(() => {
+      axios
+        .get(`http://127.0.0.1:8000/vitals/${patientId}`)
+        .then((res) => {
+          setVitals(res.data);
+          setLoading(false);
+        })
+        .catch(() => {});
+    }, 2000);
+
+    return () => clearInterval(poller);
+  }, [patientId]);
 }

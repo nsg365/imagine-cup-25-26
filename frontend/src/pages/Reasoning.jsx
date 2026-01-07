@@ -1,6 +1,4 @@
-// src/pages/Reasoning.jsx
 import { useEffect, useState } from "react";
-import SidebarLayout from "../layout/SidebarLayout";
 
 export default function Reasoning() {
   const [incident, setIncident] = useState(null);
@@ -17,7 +15,7 @@ export default function Reasoning() {
   }, []);
 
   return (
-    <SidebarLayout>
+    <div className="min-h-screen bg-slate-100 p-10">
       <div className="max-w-4xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold text-blue-700">
           AI Medical Reasoning
@@ -26,50 +24,39 @@ export default function Reasoning() {
         {!incident ? (
           <p className="text-gray-600">No incidents yet.</p>
         ) : (
-          <div className="card space-y-4">
-
+          <div className="bg-white rounded-xl shadow p-6 space-y-4">
             <p>
               <strong>Detected Condition:</strong>{" "}
-              {incident.likely_condition || incident.detected_pattern}
+              {incident.likely_condition || incident.detected_pattern || "Unknown"}
             </p>
 
             <p>
               <strong>Triage Level:</strong>{" "}
-              {incident.triage_level}
+              {incident.triage_level ?? "Not assigned"}
             </p>
 
-            {incident.confidence !== undefined && (
-              <p>
-                <strong>Confidence:</strong>{" "}
-                {(incident.confidence * 100).toFixed(0)}%
-              </p>
-            )}
-
             <div>
-              <strong>AI Explanation:</strong>
-              <ul className="list-disc ml-6 mt-2 text-gray-700">
-                {incident.explanation?.length > 0 ? (
-                  incident.explanation.map((e, i) => (
-                    <li key={i}>{e}</li>
-                  ))
-                ) : (
-                  <li>No explanation available</li>
-                )}
-              </ul>
+              <strong>AI Reasoning:</strong>
+              <p className="text-gray-700 mt-2">
+                {incident.detected_pattern
+                  ? `Vitals and/or patient input matched the ${incident.detected_pattern} pattern, triggering this decision.`
+                  : "No AI reasoning available yet."}
+              </p>
             </div>
 
-            {incident.justification && (
+            {incident.chosen_hospital_name && (
               <div>
-                <strong>Hospital Selection Logic:</strong>
+                <strong>Routing Decision:</strong>
                 <p className="text-gray-700 mt-1">
-                  {incident.justification}
+                  Patient routed to {incident.chosen_hospital_name}
+                  {incident.eta_minutes && ` (ETA: ${incident.eta_minutes} mins)`}
                 </p>
               </div>
             )}
-
           </div>
         )}
       </div>
-    </SidebarLayout>
+    </div>
   );
 }
+

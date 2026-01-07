@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+import os
 load_dotenv()
 
 from .auth.routes import router as auth_router
@@ -205,3 +206,9 @@ Immediate assistance is required.
         print(f"[WARNING] Incident not stored: {e}")
 
     return {"status": "Manual SOS sent"}
+
+@app.get("/vitals/{patient_id}")
+def get_latest_vitals(patient_id: str):
+    return storage.get_latest_vitals(patient_id)
+
+

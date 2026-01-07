@@ -75,3 +75,7 @@ class Storage:
 
     def list_incidents(self) -> List[Incident]:
         return list(self.INCIDENTS.values())
+ 
+    def get_latest_vitals(self, patient_id: str):
+        vitals = self.vitals.get(patient_id, [])
+        return vitals[-1] if vitals else None
