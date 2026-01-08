@@ -97,13 +97,18 @@ class Incident(BaseModel):
     status: IncidentStatus
     created_at: datetime
     updated_at: datetime
+
     detected_pattern: Optional[str] = None
     triage_level: Optional[int] = None
     likely_condition: Optional[str] = None
+    confidence: Optional[float] = None
+    explanation: Optional[List[str]] = None
+
     chosen_hospital_id: Optional[str] = None
     chosen_hospital_name: Optional[str] = None
     eta_minutes: Optional[int] = None
-    route_info: Optional[Dict] = None
+    route_info: Optional[dict] = None
+
 
 
 # ---------------------------

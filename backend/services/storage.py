@@ -31,16 +31,16 @@ class Storage:
         return self.PATIENTS.get(patient_id)
 
     # ---------------- VITALS ----------------
-    # ---------------- VITALS ----------------
     def save_vitals(self, vitals: VitalsInput) -> VitalsInput:
         self.VITALS_LOG.append(vitals)
         return vitals
 
-    def get_latest_vitals(self, patient_id: str) -> Optional[VitalsInput]:
-        for vitals in reversed(self.VITALS_LOG):
-            if vitals.patient_id == patient_id:
-                return vitals
-            return None
+    def get_latest_vitals(self, patient_id: str):
+        for v in reversed(self.VITALS_LOG):
+            if v.patient_id == patient_id:
+                return v
+        return None
+
 
 
     # ---------------- INCIDENTS ----------------
