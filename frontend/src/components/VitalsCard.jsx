@@ -1,30 +1,10 @@
-// src/components/VitalsCard.jsx
-import { Activity, HeartPulse, Thermometer, Droplet } from "lucide-react";
-
-function getColor(type, value) {
-  if (value == null) return "text-slate-500";
-
-  switch (type) {
-    case "hr":
-      return value < 50 || value > 120 ? "text-red-600" : "text-green-600";
-    case "spo2":
-      return value < 92 ? "text-red-600" : "text-green-600";
-    case "temp":
-      return value < 36 || value > 38 ? "text-red-600" : "text-green-600";
-    default:
-      return "text-slate-700";
-  }
-}
+import { Activity, HeartPulse, Droplets, AlertTriangle } from "lucide-react";
 
 export default function VitalsCard({ vitals }) {
   if (!vitals) {
     return (
-      <div className="card">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
-          <Activity className="text-green-600" size={22} />
-          Vitals
-        </h2>
-        <p className="text-slate-500 mt-4">No vitals available</p>
+      <div className="bg-white p-6 rounded-xl shadow border text-slate-500">
+        No vitals data available yet.
       </div>
     );
   }
@@ -32,66 +12,70 @@ export default function VitalsCard({ vitals }) {
   const {
     heart_rate,
     spo2,
-    temperature,
     systolic_bp,
     diastolic_bp,
+    motion_flag,
+    fall_flag,
+    timestamp,
   } = vitals;
 
   return (
-    <div className="card">
-      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-        <Activity className="text-green-600" size={22} />
-        Vitals
-      </h2>
+    <div className="bg-white p-6 rounded-xl shadow border space-y-4">
 
-      <div className="grid grid-cols-2 gap-6">
-        {/* Heart Rate */}
-        <div>
-          <div className="flex items-center gap-2 text-slate-600">
-            <HeartPulse size={18} />
-            Heart Rate
-          </div>
-          <div className={`text-2xl font-bold ${getColor("hr", heart_rate)}`}>
-            {heart_rate ?? "--"} bpm
-          </div>
+      {/* HEADER */}
+      <div className="flex items-center gap-2 text-xl font-semibold text-slate-800">
+        <Activity className="text-blue-600" />
+        Latest Vitals
+      </div>
+
+      {/* VITAL GRID */}
+      <div className="grid grid-cols-2 gap-4 text-slate-700">
+
+        <div className="flex items-center gap-2">
+          <HeartPulse className="text-red-600" />
+          <span>
+            Heart Rate:{" "}
+            <strong>{heart_rate ?? "--"} bpm</strong>
+          </span>
         </div>
 
-        {/* SpO2 */}
-        <div>
-          <div className="flex items-center gap-2 text-slate-600">
-            <Droplet size={18} />
-            SpO₂
-          </div>
-          <div className={`text-2xl font-bold ${getColor("spo2", spo2)}`}>
-            {spo2 ?? "--"}%
-          </div>
+        <div className="flex items-center gap-2">
+          <Droplets className="text-blue-600" />
+          <span>
+            SpO₂:{" "}
+            <strong>{spo2 ?? "--"}%</strong>
+          </span>
         </div>
 
-        {/* Temperature */}
         <div>
-          <div className="flex items-center gap-2 text-slate-600">
-            <Thermometer size={18} />
-            Temperature
-          </div>
-          <div className={`text-2xl font-bold ${getColor("temp", temperature)}`}>
-            {temperature ?? "--"}°C
-          </div>
-        </div>
-
-        {/* Blood Pressure */}
-        <div>
-          <div className="flex items-center gap-2 text-slate-600">
-            <Activity size={18} />
-            Blood Pressure
-          </div>
-          <div className="text-2xl font-bold text-slate-800">
+          Blood Pressure:{" "}
+          <strong>
             {systolic_bp && diastolic_bp
-              ? `${systolic_bp}/${diastolic_bp}`
-              : "--/--"} mmHg
-          </div>
+              ? `${systolic_bp}/${diastolic_bp} mmHg`
+              : "--"}
+          </strong>
+        </div>
+
+        <div>
+          Time:{" "}
+          <strong>
+            {timestamp
+              ? new Date(timestamp).toLocaleTimeString()
+              : "--"}
+          </strong>
         </div>
       </div>
+
+      {/* ALERT FLAGS */}
+      {(motion_flag || fall_flag) && (
+        <div className="mt-4 p-3 rounded-lg bg-red-50 text-red-700 flex items-center gap-2">
+          <AlertTriangle />
+          {fall_flag && "Fall detected. "}
+          {motion_flag && "Abnormal motion detected."}
+        </div>
+      )}
     </div>
   );
 }
+
 
