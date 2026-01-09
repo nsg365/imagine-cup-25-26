@@ -15,3 +15,5 @@ venv/
 *.log
 *.zip
 
+Ollama.dmg
+*.dmg
