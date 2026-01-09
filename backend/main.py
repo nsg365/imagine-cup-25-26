@@ -1,6 +1,10 @@
-from dotenv import load_dotenv
 import os
-load_dotenv()
+from dotenv import load_dotenv
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
+
 
 from .auth.routes import router as auth_router
 from .auth.auth_db import init_auth_db, store_user_credentials
