@@ -10,58 +10,74 @@ import ContactsList from "../components/ContactsList";
 import EmergencyAlert from "../components/EmergencyAlert";
 import HospitalRouteCard from "../components/HospitalRouteCard";
 
+const API_BASE = "http://127.0.0.1:8000";
+
 export default function Dashboard() {
   const patientId = localStorage.getItem("patient_id");
   const location = useLocation();
 
   const [patient, setPatient] = useState(null);
+  const [latestVitals, setLatestVitals] = useState(null);
   const [latestIncident, setLatestIncident] = useState(null);
   const [hospital, setHospital] = useState(null);
 
   const isDashboardHome = location.pathname === "/dashboard";
 
+  // ===============================
   // Load patient profile
+  // ===============================
   useEffect(() => {
     if (!patientId) return;
     getPatient(patientId).then(setPatient);
   }, [patientId]);
 
-  // Poll incidents every 2 sec
+  // ===============================
+  // Poll vitals + incidents
+  // ===============================
   useEffect(() => {
-    const interval = setInterval(() => {
-      getIncidents().then((data) => {
-        const critical = data.filter(
-          (i) => i.status === "EMERGENCY" || i.status === "SUSPECTED"
-        );
+    const interval = setInterval(async () => {
+      if (!patientId) return;
 
-        const incident = critical[0] || null;
-        setLatestIncident(incident);
+      // 🔹 Fetch latest vitals (EXISTING backend endpoint)
+      try {
+        const vitalsRes = await fetch(`${API_BASE}/vitals/${patientId}`);
+        const vitals = vitalsRes.ok ? await vitalsRes.json() : null;
+        setLatestVitals(vitals);
+      } catch {
+        setLatestVitals(null);
+      }
 
-        if (
-          incident &&
-          incident.route_info &&
-          incident.chosen_hospital_name &&
-          incident.eta_minutes !== undefined
-        ) {
-          setHospital({
-            hospital_name: incident.chosen_hospital_name,
-            lat: incident.route_info.lat,
-            lon: incident.route_info.lon,
-            eta_minutes: incident.eta_minutes,
-            phone: incident.route_info.phone || null,
-          });
-        } else {
-          setHospital(null);
-        }
-      });
+      // 🔹 Fetch incidents
+      const data = await getIncidents();
+      const critical = data.filter(
+        (i) => i.status === "EMERGENCY" || i.status === "SUSPECTED"
+      );
+
+      const incident = critical[0] || null;
+      setLatestIncident(incident);
+
+      if (incident?.chosen_hospital_name) {
+        setHospital({
+          hospital_name: incident.chosen_hospital_name,
+          lat: incident.route_info?.lat ?? null,
+          lon: incident.route_info?.lon ?? null,
+          eta_minutes: incident.eta_minutes ?? null,
+          phone: incident.route_info?.phone ?? null,
+          address: incident.route_info?.address ?? null,
+          rating: incident.route_info?.rating ?? null,
+          reviews: incident.route_info?.reviews ?? null,
+        });
+      } else if (!incident) {
+        setHospital(null);
+      }
     }, 2000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [patientId]);
 
   return (
     <SidebarLayout>
-      {/* ===== DASHBOARD OVERVIEW (ONLY /dashboard) ===== */}
+      {/* ================= DASHBOARD OVERVIEW ================= */}
       {isDashboardHome && (
         <>
           <h1 className="text-4xl font-bold text-gray-800 mb-8">
@@ -70,7 +86,9 @@ export default function Dashboard() {
           </h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <VitalsCard vitals={patient?.latest_vitals} />
+            {/* ✅ FIXED: vitals now come from /vitals/{patient_id} */}
+            <VitalsCard vitals={latestVitals} />
+
             <ContactsList contacts={patient?.emergency_contacts || []} />
           </div>
 
@@ -95,7 +113,6 @@ export default function Dashboard() {
         <EmergencyAlert incident={latestIncident} />
       </div>
 
-      {/* ===== CHILD ROUTES ===== */}
       <Outlet />
     </SidebarLayout>
   );

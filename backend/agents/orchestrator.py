@@ -110,14 +110,19 @@ ETA: {routing.eta_minutes} minutes
 
             print("[ORCHESTRATOR] Routing decision:", routing)
 
-            incident = storage.update_incident(
-            incident.incident_id,
-            detected_pattern=rec.likely_condition,
-            triage_level=rec.triage_level,
-            likely_condition=rec.likely_condition,
-            confidence=rec.confidence,
-            explanation=rec.explanation
+            incident = self.storage.update_incident(
+                incident.incident_id,
+                detected_pattern=rec.likely_condition,
+                triage_level=rec.triage_level,
+                likely_condition=rec.likely_condition,
+                confidence=rec.confidence,
+                explanation=rec.explanation,
+                chosen_hospital_id=routing.chosen_hospital_id,
+                chosen_hospital_name=routing.chosen_hospital_name,
+                eta_minutes=routing.eta_minutes,
+                route_info=routing.route_info,
             )
+
 
 
             # 🚨 AUTO SMS TRIGGER

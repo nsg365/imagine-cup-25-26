@@ -79,4 +79,3 @@ export async function loginPatient(payload) {
 
   return res.json();
 }
-

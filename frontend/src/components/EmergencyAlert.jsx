@@ -5,16 +5,22 @@ export default function EmergencyAlert({ incident }) {
   if (!incident || incident.triage_level < 4) return null;
 
   const condition =
-    incident.likely_condition || incident.detected_pattern || "Unknown condition";
+    incident.likely_condition ||
+    incident.detected_pattern ||
+    "Unknown condition";
 
   const {
     triage_level,
     chosen_hospital_name,
     eta_minutes,
-    route_info = {},
+    route_info,
   } = incident;
 
-  const { address, rating, reviews, lat, lon } = route_info;
+  const address = route_info?.address;
+  const rating = route_info?.rating;
+  const reviews = route_info?.reviews;
+  const lat = route_info?.lat;
+  const lon = route_info?.lon;
 
   return (
     <div className="card border-l-4 border-red-600 bg-red-50 emergency-pulse">
@@ -35,7 +41,7 @@ export default function EmergencyAlert({ incident }) {
       </p>
 
       {/* Hospital Info */}
-      {chosen_hospital_name && (
+      {chosen_hospital_name ? (
         <div className="mt-4 p-4 bg-white rounded-xl border space-y-1">
           <p className="flex items-center gap-2 font-semibold text-slate-700">
             <MapPin size={18} className="text-blue-600" />
@@ -61,6 +67,10 @@ export default function EmergencyAlert({ incident }) {
             </p>
           )}
         </div>
+      ) : (
+        <p className="mt-4 text-gray-500 italic">
+          Routing emergency services…
+        </p>
       )}
 
       {/* Actions */}
@@ -87,4 +97,3 @@ export default function EmergencyAlert({ incident }) {
     </div>
   );
 }
-
