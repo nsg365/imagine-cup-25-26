@@ -4,7 +4,10 @@ from typing import List, Dict
 from ..twilio_config import client, TWILIO_NUMBER
 import os
 from dotenv import load_dotenv
-load_dotenv()
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 EMERGENCY_PHONE = os.getenv("EMERGENCY_PHONE")
 print("EMERGENCY_PHONE =", EMERGENCY_PHONE)
